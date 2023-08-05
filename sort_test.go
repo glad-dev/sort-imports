@@ -86,11 +86,13 @@ func TestIsThirdParty(t *testing.T) {
 		"t2 \"testing\"": false,
 		"_ \"testing\"":  false,
 		// Third party
-		"\"github.com\"":     false,
-		"\"github-com\"":     false,
-		"\"github.com/a\"":   true,
-		"g \"github.com/a\"": true,
-		"_ \"github.com/a\"": true,
+		"\"github.com\"":      false,
+		"\"github-com\"":      false,
+		"\"gitlab.com/a\"":    true,
+		"\"bitbucket.com/a\"": true,
+		"\"github.com/a\"":    true,
+		"g \"github.com/a\"":  true,
+		"_ \"github.com/a\"":  true,
 	}
 
 	for stmt, expected := range m {
@@ -112,23 +114,117 @@ func TestSortImports(t *testing.T) {
 		expected   []string
 	}
 
-	testCases := make([]testCase, 0)
-	testCases = append(testCases, testCase{
-		moduleName: "",
-		imports: []string{
-			"\"fmt\"",
-			"\"testing\"",
+	testCases := []testCase{
+		{
+			moduleName: "",
+			imports: []string{
+				"\"testing\"",
+				"\"fmt\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+			},
 		},
-		expected: []string{
-			"\"fmt\"",
-			"\"testing\"",
+		{
+			moduleName: "",
+			imports: []string{
+				"\"fmt\"",
+				"",
+				"\"testing\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+			},
 		},
-	})
+		{
+			moduleName: "",
+			imports: []string{
+				"\"testing\"",
+				"\"fmt\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+			},
+		},
+		{
+			moduleName: "",
+			imports: []string{
+				"\"testing\"",
+				"",
+				"\"fmt\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+			},
+		},
+		{
+			moduleName: "",
+			imports: []string{
+				"\"fmt\"",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\n",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+		},
+		{
+			moduleName: "github.com/glad-dev/sort-imports",
+			imports: []string{
+				"\"fmt\"",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\n",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+		},
+		{
+			moduleName: "github.com/glad-dev/sort-imports",
+			imports: []string{
+				"\"fmt\"",
+				"\"github.com/glad-dev/other-repo/\"",
+				"\"testing\"",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+				"\n",
+				"\"github.com/glad-dev/sort-imports/\"",
+				"\n",
+				"\"github.com/glad-dev/other-repo/\"",
+			},
+		},
+		{
+			moduleName: "github.com/glad-dev/sort-imports",
+			imports: []string{
+				"\"fmt\"",
+				"\"github.com/glad-dev/other-repo/\"",
+				"\"testing\"",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+				"\n",
+				"\"github.com/glad-dev/sort-imports/\"",
+				"\n",
+				"\"github.com/glad-dev/other-repo/\"",
+			},
+		},
+	}
 
 	for _, c := range testCases {
 		sorted := sortImports(c.imports, c.moduleName)
 		if !compareStringArray(sorted, c.expected) {
-			t.Errorf("Expected (%d): %v, got (%d): %v", len(c.expected), c.expected, len(sorted), sorted)
+			t.Errorf("Expected (%d): %s, got (%d): %v", len(c.expected), str(c.expected), len(sorted), str(sorted))
 		}
 	}
 }
@@ -145,4 +241,17 @@ func compareStringArray(a []string, b []string) bool {
 	}
 
 	return true
+}
+
+func str(a []string) string {
+	for i, s := range a {
+		switch s {
+		case "\n":
+			a[i] = "\"\\n\""
+		case "\t":
+			a[i] = "\"\\t\""
+		}
+	}
+
+	return fmt.Sprintf("%v", a)
 }
