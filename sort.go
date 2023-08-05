@@ -6,18 +6,23 @@ import (
 	"strings"
 )
 
-func s(imports []string, moduleName string) []string {
+func sortImports(imports []string, moduleName string) []string {
 	stdLib := make([]string, 0)
 	firstParty := make([]string, 0)
 	thirdParty := make([]string, 0)
 
-	for _, s := range imports {
-		if isFirstParty(s, moduleName) {
-			firstParty = append(firstParty, s)
-		} else if isThirdParty(s) {
-			thirdParty = append(thirdParty, s)
+	for _, stmt := range imports {
+		stmt = strings.TrimSpace(stmt)
+		if len(stmt) == 0 {
+			continue
+		}
+
+		if isFirstParty(stmt, moduleName) {
+			firstParty = append(firstParty, stmt)
+		} else if isThirdParty(stmt) {
+			thirdParty = append(thirdParty, stmt)
 		} else {
-			stdLib = append(stdLib, s)
+			stdLib = append(stdLib, stmt)
 		}
 	}
 
