@@ -49,11 +49,12 @@ func sortImports(imports []string, moduleName string) []string {
 
 func isFirstParty(stmt string, moduleName string) bool {
 	stmt = removeCustomNaming(stmt)
-	return strings.HasPrefix(stmt, moduleName)
+	return strings.HasPrefix(stmt, "\""+moduleName)
 }
 
 func isThirdParty(stmt string) bool {
-	b, _ := regexp.MatchString("^[a-zA-Z]+.[a-zA-Z]/.+", stmt)
+	stmt = removeCustomNaming(stmt)
+	b, _ := regexp.MatchString("^\"[a-zA-Z0-9]+.[a-zA-Z0-9]+/", stmt)
 
 	return b
 }
@@ -63,9 +64,7 @@ func removeCustomNaming(stmt string) string {
 	i := strings.Index(stmt, "\"")
 	if i == -1 {
 		panic("No \"") // ToDo: Error msg
-	} else if len(stmt) < i+1 {
-		panic("Too short")
 	}
 
-	return stmt[i+1:]
+	return stmt[i:]
 }

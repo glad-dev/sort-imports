@@ -69,7 +69,35 @@ func TestIsFirstPartyGlobalModule(t *testing.T) {
 		got := isFirstParty(stmt, moduleName)
 		if got != expected {
 			if expected {
-				t.Errorf("'%s' should have been accepted, but was rejected", stmt)
+				t.Errorf("%s should have been accepted, but was rejected", stmt)
+			}
+
+			t.Errorf("%s should have been rejected, but was accepted", stmt)
+		}
+	}
+}
+
+func TestIsThirdParty(t *testing.T) {
+	m := map[string]bool{
+		// stdLib
+		"\"test-ing\"":   false,
+		"\"testing\"":    false,
+		"t \"testing\"":  false,
+		"t2 \"testing\"": false,
+		"_ \"testing\"":  false,
+		// Third party
+		"\"github.com\"":     false,
+		"\"github-com\"":     false,
+		"\"github.com/a\"":   true,
+		"g \"github.com/a\"": true,
+		"_ \"github.com/a\"": true,
+	}
+
+	for stmt, expected := range m {
+		got := isThirdParty(stmt)
+		if got != expected {
+			if expected {
+				t.Errorf("%s should have been accepted, but was rejected", stmt)
 			}
 
 			t.Errorf("'%s' should have been rejected, but was accepted", stmt)
