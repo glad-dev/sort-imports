@@ -104,3 +104,45 @@ func TestIsThirdParty(t *testing.T) {
 		}
 	}
 }
+
+func TestSortImports(t *testing.T) {
+	type testCase struct {
+		moduleName string
+		imports    []string
+		expected   []string
+	}
+
+	testCases := make([]testCase, 0)
+	testCases = append(testCases, testCase{
+		moduleName: "",
+		imports: []string{
+			"\"fmt\"",
+			"\"testing\"",
+		},
+		expected: []string{
+			"\"fmt\"",
+			"\"testing\"",
+		},
+	})
+
+	for _, c := range testCases {
+		sorted := sortImports(c.imports, c.moduleName)
+		if !compareStringArray(sorted, c.expected) {
+			t.Errorf("Expected (%d): %v, got (%d): %v", len(c.expected), c.expected, len(sorted), sorted)
+		}
+	}
+}
+
+func compareStringArray(a []string, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}

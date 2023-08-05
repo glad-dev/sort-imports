@@ -43,6 +43,7 @@ func sortImports(imports []string, moduleName string) []string {
 	out := make([]string, 0)
 	out = append(out, stdLib...)
 	out = append(out, firstParty...)
+	// ToDo: Remove trailing newline if only stdLib or only firstParty exist
 
 	return append(out, thirdParty...)
 }
