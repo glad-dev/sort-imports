@@ -17,7 +17,7 @@ func sortImports(imports []string, moduleName string) []string {
 			continue
 		}
 
-		if isFirstParty(stmt, moduleName) {
+		if isFirstParty(stmt, moduleName) { // nolint:gocritic
 			firstParty = append(firstParty, stmt)
 		} else if isThirdParty(stmt) {
 			thirdParty = append(thirdParty, stmt)
@@ -31,11 +31,11 @@ func sortImports(imports []string, moduleName string) []string {
 	sort.Strings(firstParty)
 	sort.Strings(thirdParty)
 
-	if len(stdLib) > 0 {
+	if len(stdLib) > 0 && (len(firstParty) > 0 || len(thirdParty) > 0) {
 		stdLib = append(stdLib, "\n")
 	}
 
-	if len(firstParty) > 0 {
+	if len(firstParty) > 0 && len(thirdParty) > 0 {
 		firstParty = append(firstParty, "\n")
 	}
 
@@ -43,13 +43,17 @@ func sortImports(imports []string, moduleName string) []string {
 	out := make([]string, 0)
 	out = append(out, stdLib...)
 	out = append(out, firstParty...)
-	// ToDo: Remove trailing newline if only stdLib or only firstParty exist
 
 	return append(out, thirdParty...)
 }
 
 func isFirstParty(stmt string, moduleName string) bool {
+	if len(moduleName) == 0 {
+		return false
+	}
+
 	stmt = removeCustomNaming(stmt)
+
 	return strings.HasPrefix(stmt, "\""+moduleName)
 }
 
