@@ -52,23 +52,23 @@ func isFirstParty(stmt string, moduleName string) bool {
 		return false
 	}
 
-	stmt = removeCustomNaming(stmt)
+	stmt = trimImport(stmt)
 
 	return strings.HasPrefix(stmt, "\""+moduleName)
 }
 
 func isThirdParty(stmt string) bool {
-	stmt = removeCustomNaming(stmt)
+	stmt = trimImport(stmt)
 	b, _ := regexp.MatchString("^\"[a-zA-Z0-9]+.[a-zA-Z0-9]+/", stmt)
 
 	return b
 }
 
-func removeCustomNaming(stmt string) string {
+func trimImport(stmt string) string {
 	// Remove custom naming
 	i := strings.Index(stmt, "\"")
 	if i == -1 {
-		panic("No \"") // ToDo: Error msg
+		return stmt
 	}
 
 	return stmt[i:]
