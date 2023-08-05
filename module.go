@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func findModFile(path string) (string, error) {
+func getModuleName(path string) (string, error) {
 	d, err := os.ReadDir(path)
 	if err != nil {
 		return "", err
@@ -24,7 +24,7 @@ func findModFile(path string) (string, error) {
 		return "", fmt.Errorf("no go.mod file was found")
 	}
 
-	return findModFile(parent)
+	return getModuleName(parent)
 }
 
 func readModFile(path string) (string, error) {
