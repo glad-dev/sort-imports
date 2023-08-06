@@ -10,10 +10,11 @@ func TestIsFirstPartyLocalModule(t *testing.T) {
 	moduleName := "asd"
 	m := map[string]bool{
 		// stdLib
-		"\"testing\"":    false,
-		"t \"testing\"":  false,
-		"t2 \"testing\"": false,
-		"_ \"testing\"":  false,
+		"\"testing\"":       false,
+		"t \"testing\"":     false,
+		"t2 \"testing\"":    false,
+		"_ \"testing\"":     false,
+		"\"path/filepath\"": false,
 		// Own
 		fmt.Sprintf("\"%s\"", moduleName):       true,
 		fmt.Sprintf("\"%s/\"", moduleName):      true,
@@ -46,10 +47,11 @@ func TestIsFirstPartyGlobalModule(t *testing.T) {
 	moduleName := "github.com/glad-dev/sort-imports"
 	m := map[string]bool{
 		// stdLib
-		"\"testing\"":    false,
-		"t \"testing\"":  false,
-		"t2 \"testing\"": false,
-		"_ \"testing\"":  false,
+		"\"testing\"":       false,
+		"t \"testing\"":     false,
+		"t2 \"testing\"":    false,
+		"_ \"testing\"":     false,
+		"\"path/filepath\"": false,
 		// Own
 		fmt.Sprintf("\"%s\"", moduleName):       true,
 		fmt.Sprintf("\"%s/\"", moduleName):      true,
@@ -80,11 +82,12 @@ func TestIsFirstPartyGlobalModule(t *testing.T) {
 func TestIsThirdParty(t *testing.T) {
 	m := map[string]bool{
 		// stdLib
-		"\"test-ing\"":   false,
-		"\"testing\"":    false,
-		"t \"testing\"":  false,
-		"t2 \"testing\"": false,
-		"_ \"testing\"":  false,
+		"\"test-ing\"":      false,
+		"\"testing\"":       false,
+		"t \"testing\"":     false,
+		"t2 \"testing\"":    false,
+		"_ \"testing\"":     false,
+		"\"path/filepath\"": false,
 		// Third party
 		"\"github.com\"":      false,
 		"\"github-com\"":      false,

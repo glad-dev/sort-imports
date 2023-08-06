@@ -59,7 +59,7 @@ func isFirstParty(stmt string, moduleName string) bool {
 
 func isThirdParty(stmt string) bool {
 	stmt = trimImport(stmt)
-	b, _ := regexp.MatchString("^\"[a-zA-Z0-9]+.[a-zA-Z0-9]+/", stmt)
+	b, _ := regexp.MatchString("^\"[a-zA-Z0-9]+\\.[a-zA-Z0-9]+/", stmt)
 
 	return b
 }
