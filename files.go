@@ -84,10 +84,10 @@ func handleFile(path string, moduleName string, c chan error) {
 	// Remove first line: "import (" and last line: ")"
 	s = s[1:]
 
-	fmt.Printf("Stmts: %v\nRegex-%d: %v\n", stmts, len(s), str(s))
+	fmt.Printf("Stmts: %v\nRegex-%d: %v\n", stmts, len(s), str2(s))
 }
 
-func str(a []string) string {
+func str2(a []string) string {
 	for i, s := range a {
 		switch s {
 		case "\n":
