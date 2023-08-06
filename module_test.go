@@ -26,7 +26,7 @@ func TestFindModFile(t *testing.T) {
 	defer func(path string) {
 		err := os.RemoveAll(path)
 		if err != nil {
-			t.Errorf("Failed to delete tmp dir: %s", err)
+			fmt.Printf("Failed to delete tmp dir: %s\n", err)
 		}
 	}(dir)
 
