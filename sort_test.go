@@ -222,6 +222,25 @@ func TestSortImports(t *testing.T) {
 				"\"github.com/glad-dev/other-repo/\"",
 			},
 		},
+		{
+			moduleName: "",
+			imports: []string{
+				"\"errors\"",
+				"\"fmt\"",
+				"\"os\"",
+				"\"path/filepath\"",
+				"\"strings\"",
+				"\"sync\"",
+			},
+			expected: []string{
+				"\"errors\"",
+				"\"fmt\"",
+				"\"os\"",
+				"\"path/filepath\"",
+				"\"strings\"",
+				"\"sync\"",
+			},
+		},
 	}
 
 	for _, c := range testCases {

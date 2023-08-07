@@ -71,5 +71,5 @@ func trimImport(stmt string) string {
 		return stmt
 	}
 
-	return stmt[i:]
+	return strings.TrimSpace(stmt[i:])
 }
