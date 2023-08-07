@@ -1,10 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 )
@@ -15,7 +15,7 @@ func do(path string, moduleName string) error {
 		return fmt.Errorf("reading dir: %w", err)
 	}
 
-	errChan := make(chan error, 1)
+	errChan := make(chan error, 100)
 	wg := &sync.WaitGroup{}
 
 	for _, entry := range dir {
@@ -23,12 +23,19 @@ func do(path string, moduleName string) error {
 			_ = do(filepath.Join(path, entry.Name()), moduleName) // ToDo
 		}
 
+		info, _ := entry.Info()
+		s := info.Mode().Perm().String()
+		fmt.Printf("Mode: %s\n", s)
+
 		if strings.HasSuffix(entry.Name(), ".go") {
-			fmt.Printf("Found go file: %s\n", entry.Name())
-			go func() {
+			func() {
 				wg.Add(1)
-				handleFile(filepath.Join(path, entry.Name()), moduleName, errChan)
-				wg.Done()
+				defer wg.Done()
+
+				err := handleFile(filepath.Join(path, entry.Name()), moduleName)
+				if err != nil {
+					errChan <- err
+				}
 			}()
 		}
 	}
@@ -44,60 +51,57 @@ func do(path string, moduleName string) error {
 	}
 }
 
-func handleFile(path string, moduleName string, c chan error) {
+func handleFile(path string, moduleName string) error {
 	// Read file
 	f, err := os.ReadFile(path)
 	if err != nil {
-		c <- fmt.Errorf("opening file: %s", err)
-		return
-	}
-
-	re := regexp.MustCompile("import\\s*\\(\\s*\"[^\"]+\"(?:\\s+\"[^\"]+\")*\\s*\\)\n")
-	r := re.Find(f)
-	if r == nil {
-		fmt.Printf("No import in %s\n", path)
-		return
+		return fmt.Errorf("opening file: %s", err)
 	}
 
 	lines := strings.Split(string(f), "\n")
 	stmts := make([]string, 0)
+	start := 0
+	end := 0
+
 	for i, line := range lines {
 		if strings.Contains(line, "import (") {
+			start = i + 1
 			for k := i + 1; k < len(lines); k++ {
 				l := strings.TrimSpace(lines[k])
 
 				if l == ")" {
+					end = k
 					break
 				}
 
 				stmts = append(stmts, l)
 			}
+
+			break
 		}
 	}
 
-	s := strings.Split(string(r), "\n")
-	if len(s) < 2 {
-		c <- fmt.Errorf("invalid import statement: %s", r)
-		return
+	if len(stmts) == 0 {
+		// No multiline import statement
+		return nil
+	} else if start == 0 {
+		return errors.New("invalid start") // ToDo
+	} else if end == 0 || end <= start {
+		return errors.New("invalid end") // ToDo
 	}
 
-	// Remove first line: "import (" and last line: ")"
-	s = s[1:]
-
-	fmt.Printf("Stmts: %v\nRegex-%d: %v\n", stmts, len(s), str2(s))
-}
-
-func str2(a []string) string {
-	for i, s := range a {
-		switch s {
-		case "\n":
-			a[i] = fmt.Sprintf("%d - \"\\n\"", i)
-		case "\t":
-			a[i] = fmt.Sprintf("%d - \"\\t\"", i)
-		default:
-			
-		}
+	sorted := sortImports(stmts, moduleName)
+	for i, _ := range sorted {
+		sorted[i] = "\t" + sorted[i]
 	}
 
-	return fmt.Sprintf("%v", a)
+	// Build new file content
+	newFile := lines[:start]
+	newFile = append(newFile, sorted...)
+	newFile = append(newFile, lines[end:]...)
+
+	// Write files
+	//os.WriteFile(path, []byte(strings.Join(newFile, "\n")), 0o666)
+
+	return nil
 }
