@@ -223,7 +223,7 @@ func TestSortImports(t *testing.T) {
 			},
 		},
 		{
-			moduleName: "",
+			moduleName: "github.com/glad-dev/sort-imports",
 			imports: []string{
 				"\"errors\"",
 				"\"fmt\"",
