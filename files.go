@@ -25,16 +25,18 @@ func do(path string, moduleName string) error {
 			_ = do(filepath.Join(path, entry.Name()), moduleName) // ToDo
 		}
 
-		info, _ := entry.Info()
-		s := info.Mode().Perm().String()
-		fmt.Printf("Mode: %s\n", s)
+		info, err := entry.Info()
+		if err != nil {
+			// Can't get file info => We can't get file permissions => Abort
+			continue // ToDo: Don't ignore error
+		}
 
 		if strings.HasSuffix(entry.Name(), ".go") {
 			func() {
 				wg.Add(1)
 				defer wg.Done()
 
-				err := handleFile(filepath.Join(path, entry.Name()), moduleName)
+				err := handleFile(filepath.Join(path, entry.Name()), moduleName, info.Mode().Perm())
 				if err != nil {
 					errChan <- err
 				}
@@ -53,11 +55,11 @@ func do(path string, moduleName string) error {
 	}
 }
 
-func handleFile(path string, moduleName string) error {
+func handleFile(path string, moduleName string, filePermissions os.FileMode) error {
 	// Read file
 	f, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("opening file: %s", err)
+		return fmt.Errorf("opening file: %w", err)
 	}
 
 	lines := strings.Split(string(f), "\n")
@@ -73,6 +75,7 @@ func handleFile(path string, moduleName string) error {
 
 				if l == ")" {
 					end = k
+
 					break
 				}
 
@@ -83,8 +86,8 @@ func handleFile(path string, moduleName string) error {
 		}
 	}
 
-	if len(stmts) == 0 {
-		// No multiline import statement
+	if len(stmts) == 0 { // nolint: gocritic
+		// File contains no multiline import statement
 		return nil
 	} else if start == 0 {
 		return errors.New("invalid start") // ToDo
@@ -93,7 +96,7 @@ func handleFile(path string, moduleName string) error {
 	}
 
 	sorted := sort.Imports(stmts, moduleName)
-	for i, _ := range sorted {
+	for i := range sorted {
 		sorted[i] = "\t" + sorted[i]
 	}
 
@@ -103,7 +106,12 @@ func handleFile(path string, moduleName string) error {
 	newFile = append(newFile, lines[end:]...)
 
 	// Write files
-	//os.WriteFile(path, []byte(strings.Join(newFile, "\n")), 0o666)
+	if false {
+		err = os.WriteFile(path, []byte(strings.Join(newFile, "\n")), filePermissions)
+		if err != nil {
+			return fmt.Errorf("writing file: %w", err)
+		}
+	}
 
 	return nil
 }

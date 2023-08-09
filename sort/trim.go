@@ -24,5 +24,6 @@ func trimI(stmt string) (string, error) {
 	index := strings.Index(stmt, "\"")
 	stmt = stmt[index+1:] // index+1 is in range of stmt since we have at least two " and index returns the first occurrence
 
-	return stmt[:strings.Index(stmt, "\"")], nil
+	// We know that strings.Index returns a valid position since we know that the input string contains two "
+	return stmt[:strings.Index(stmt, "\"")], nil // nolint:gocritic
 }
