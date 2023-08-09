@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	
+	"github.com/glad-dev/sort-imports/sort"
 )
 
 func do(path string, moduleName string) error {
@@ -90,7 +92,7 @@ func handleFile(path string, moduleName string) error {
 		return errors.New("invalid end") // ToDo
 	}
 
-	sorted := sortImports(stmts, moduleName)
+	sorted := sort.Imports(stmts, moduleName)
 	for i, _ := range sorted {
 		sorted[i] = "\t" + sorted[i]
 	}

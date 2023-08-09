@@ -1,4 +1,4 @@
-package main
+package sort
 
 import (
 	"fmt"
@@ -244,9 +244,9 @@ func TestSortImports(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		sorted := sortImports(c.imports, c.moduleName)
+		sorted := Imports(c.imports, c.moduleName)
 		if !compareStringArray(sorted, c.expected) {
-			t.Errorf("Expected (%d): %s, got (%d): %v", len(c.expected), str(c.expected), len(sorted), str(sorted))
+			t.Errorf("Expected (%d): %s, got (%d): %v", len(c.expected), replaceSpecial(c.expected), len(sorted), replaceSpecial(sorted))
 		}
 	}
 }
@@ -265,7 +265,7 @@ func compareStringArray(a []string, b []string) bool {
 	return true
 }
 
-func str(a []string) string {
+func replaceSpecial(a []string) string {
 	for i, s := range a {
 		switch s {
 		case "\n":
