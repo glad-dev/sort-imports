@@ -100,7 +100,7 @@ func TestClassification(t *testing.T) {
 	m := localFirstPartyModule(moduleName)
 
 	for stmt, expected := range m {
-		new := determine(stmt, moduleName)
+		n := determine(stmt, moduleName)
 		old := isFirstParty(stmt, moduleName)
 
 		if old != expected {
@@ -109,10 +109,10 @@ func TestClassification(t *testing.T) {
 			return
 		}
 
-		if old && new != firstParty {
-			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, new)
-		} else if !old && new == firstParty {
-			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, new)
+		if old && n != firstParty {
+			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
+		} else if !old && n == firstParty {
+			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
 		}
 	}
 }
