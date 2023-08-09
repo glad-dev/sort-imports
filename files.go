@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	
+
 	"github.com/glad-dev/sort-imports/sort"
 )
 
