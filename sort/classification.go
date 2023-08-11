@@ -5,13 +5,19 @@ import (
 	"strings"
 )
 
-type party int8
+type party struct {
+	slug string
+}
 
-const (
-	undetermined party = iota
-	stdLib
-	firstParty
-	thirdParty
+func (p *party) String() string {
+	return p.slug
+}
+
+var (
+	undetermined = party{slug: "undetermined"}
+	stdLib       = party{slug: "stdLib"}
+	firstParty   = party{slug: "firstParty"}
+	thirdParty   = party{slug: "thirdParty"}
 )
 
 func determine(stmt string, moduleName string) party {
