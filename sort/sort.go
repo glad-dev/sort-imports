@@ -16,12 +16,23 @@ func Imports(imports []string, moduleName string) []string {
 			continue
 		}
 
-		if isFirstParty(stmt, moduleName) { // nolint:gocritic
-			first = append(first, stmt)
-		} else if isThirdParty(stmt) {
-			third = append(third, stmt)
-		} else {
+		switch determine(stmt, moduleName) {
+		case undetermined:
+			// ToDo
+			fallthrough
+
+		case stdLib:
 			std = append(std, stmt)
+
+		case firstParty:
+			first = append(first, stmt)
+
+		case thirdParty:
+			third = append(third, stmt)
+
+		default:
+			// Unreachable but return unsorted list, just in case
+			return imports
 		}
 	}
 

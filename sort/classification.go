@@ -21,7 +21,7 @@ var (
 )
 
 func determine(stmt string, moduleName string) party {
-	stmt, err := trimI(stmt)
+	stmt, err := trimImport(stmt)
 	if err != nil || len(stmt) == 0 {
 		return undetermined
 	}
@@ -39,21 +39,4 @@ func determine(stmt string, moduleName string) party {
 	}
 
 	return stdLib
-}
-
-func isFirstParty(stmt string, moduleName string) bool {
-	if len(moduleName) == 0 {
-		return false
-	}
-
-	stmt = trimImport(stmt)
-
-	return strings.HasPrefix(stmt, "\""+moduleName)
-}
-
-func isThirdParty(stmt string) bool {
-	stmt = trimImport(stmt)
-	b, _ := regexp.MatchString("^\"[a-zA-Z0-9]+\\.[a-zA-Z0-9]+/", stmt)
-
-	return b
 }

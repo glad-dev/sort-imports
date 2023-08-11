@@ -5,17 +5,7 @@ import (
 	"strings"
 )
 
-func trimImport(stmt string) string {
-	// Remove custom naming
-	i := strings.Index(stmt, "\"")
-	if i == -1 {
-		return stmt
-	}
-
-	return strings.TrimSpace(stmt[i:])
-}
-
-func trimI(stmt string) (string, error) {
+func trimImport(stmt string) (string, error) {
 	if strings.Count(stmt, "\"") != 2 {
 		return "", fmt.Errorf("import statement '%s' is malformed: does not contain two \"", stmt)
 	}
