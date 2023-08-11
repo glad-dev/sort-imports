@@ -5,96 +5,6 @@ import (
 	"testing"
 )
 
-func TestIsFirstPartyLocalModule(t *testing.T) {
-	moduleName := "moduleName"
-	m := firstPartyModule(moduleName)
-
-	for stmt, expected := range m {
-		got := isFirstParty(stmt, moduleName)
-		if got != expected {
-			if expected {
-				t.Errorf("'%s' should have been accepted, but was rejected", stmt)
-
-				return
-			}
-
-			t.Errorf("'%s' should have been rejected, but was accepted", stmt)
-		}
-	}
-}
-
-func TestIsFirstPartyGlobalModule(t *testing.T) {
-	// Module
-	moduleName := "github.com/glad-dev/sort-imports"
-	m := map[string]bool{
-		// stdLib
-		"\"testing\"":       false,
-		"t \"testing\"":     false,
-		"t2 \"testing\"":    false,
-		"_ \"testing\"":     false,
-		"\"path/filepath\"": false,
-		// Own
-		fmt.Sprintf("\"%s\"", moduleName):       true,
-		fmt.Sprintf("\"%s/\"", moduleName):      true,
-		fmt.Sprintf("\"%s/a\"", moduleName):     true,
-		fmt.Sprintf("\"%s/a/\"", moduleName):    true,
-		fmt.Sprintf("\"%s/a123/\"", moduleName): true,
-		fmt.Sprintf("a \"%s/a\"", moduleName):   true,
-		fmt.Sprintf("_ \"%s/a\"", moduleName):   true,
-		// Third party
-		"\"github.com\"":     false,
-		"\"github.com/a\"":   false,
-		"g \"github.com/a\"": false,
-		"_ \"github.com/a\"": false,
-	}
-
-	for stmt, expected := range m {
-		got := isFirstParty(stmt, moduleName)
-		if got != expected {
-			if expected {
-				t.Errorf("%s should have been accepted, but was rejected", stmt)
-
-				return
-			}
-
-			t.Errorf("%s should have been rejected, but was accepted", stmt)
-		}
-	}
-}
-
-func TestIsThirdParty(t *testing.T) {
-	m := map[string]bool{
-		// stdLib
-		"\"test-ing\"":      false,
-		"\"testing\"":       false,
-		"t \"testing\"":     false,
-		"t2 \"testing\"":    false,
-		"_ \"testing\"":     false,
-		"\"path/filepath\"": false,
-		// Third party
-		"\"github.com\"":      false,
-		"\"github-com\"":      false,
-		"\"gitlab.com/a\"":    true,
-		"\"bitbucket.com/a\"": true,
-		"\"github.com/a\"":    true,
-		"g \"github.com/a\"":  true,
-		"_ \"github.com/a\"":  true,
-	}
-
-	for stmt, expected := range m {
-		got := isThirdParty(stmt)
-		if got != expected {
-			if expected {
-				t.Errorf("%s should have been accepted, but was rejected", stmt)
-
-				return
-			}
-
-			t.Errorf("'%s' should have been rejected, but was accepted", stmt)
-		}
-	}
-}
-
 func TestStdLibClassification(t *testing.T) {
 	std := stdLibList()
 	for stmt, expected := range std {
@@ -104,109 +14,53 @@ func TestStdLibClassification(t *testing.T) {
 		sameName := determine(stmt, stmt[1:len(stmt)-1]) // Check if shadowing a package name works
 
 		if noName != expected {
-			t.Errorf("stmt '%s' is not classified as stdLib: %v", stmt, noName)
+			t.Errorf("stmt '%s' is not classified as stdLib: %s", stmt, noName.String())
 		}
 
 		if localName != expected {
-			t.Errorf("stmt '%s' is not classified as stdLib: %v", stmt, localName)
+			t.Errorf("stmt '%s' is not classified as stdLib: %s", stmt, localName.String())
 		}
 
 		if moduleName != expected {
-			t.Errorf("stmt '%s' is not classified as stdLib: %v", stmt, moduleName)
+			t.Errorf("stmt '%s' is not classified as stdLib: %s", stmt, moduleName.String())
 		}
 
 		if sameName != firstParty {
-			t.Errorf("Error with shadowing: '%s' is not classified as first party: %v", stmt, moduleName)
+			t.Errorf("Error with shadowing: '%s' is not classified as first party: %s", stmt, moduleName.String())
 		}
 	}
-
 }
 
-func TestClassification(t *testing.T) {
-	// Local module
-	moduleName := "moduleName"
-	m := firstPartyModule(moduleName)
-
-	for stmt, expected := range m {
-		n := determine(stmt, moduleName)
-		old := isFirstParty(stmt, moduleName)
-
-		if old != expected {
-			t.Errorf("Old != expected!")
-
-			return
-		}
-
-		if old && n != firstParty {
-			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
-		} else if !old && n == firstParty {
-			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
+func TestFirstPartyClassification(t *testing.T) {
+	moduleName := "sort-imports"
+	for stmt, expected := range firstAndThirdParty(moduleName) {
+		if d := determine(stmt, moduleName); d != expected {
+			t.Errorf("stmt '%s' is incorrectly classified as %s instead of %s", stmt, d.String(), expected.String())
 		}
 	}
 
-	// Hosted module
 	moduleName = "github.com/glad-dev/sort-imports"
-	m = firstPartyModule(moduleName)
-
-	for stmt, expected := range m {
-		n := determine(stmt, moduleName)
-		old := isFirstParty(stmt, moduleName)
-
-		if old != expected {
-			t.Errorf("Old != expected!")
-
-			return
-		}
-
-		if old && n != firstParty {
-			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
-		} else if !old && n == firstParty {
-			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
+	for stmt, expected := range firstAndThirdParty(moduleName) {
+		if d := determine(stmt, moduleName); d != expected {
+			t.Errorf("stmt '%s' is incorrectly classified as %s instead of %s", stmt, d.String(), expected.String())
 		}
 	}
 }
 
-func firstPartyModule(moduleName string) map[string]bool {
-	return map[string]bool{
-		// stdLib
-		"\"testing\"":       false,
-		"t \"testing\"":     false,
-		"t2 \"testing\"":    false,
-		"_ \"testing\"":     false,
-		"\"path/filepath\"": false,
-		// Own
-		fmt.Sprintf("\"%s\"", moduleName):       true,
-		fmt.Sprintf("\"%s/\"", moduleName):      true,
-		fmt.Sprintf("\"%s/a\"", moduleName):     true,
-		fmt.Sprintf("\"%s/a/\"", moduleName):    true,
-		fmt.Sprintf("\"%s/a123/\"", moduleName): true,
-		fmt.Sprintf("a \"%s/a\"", moduleName):   true,
-		fmt.Sprintf("_ \"%s/a\"", moduleName):   true,
-		// Third party
-		"\"github.com\"":     false,
-		"\"github.com/a\"":   false,
-		"g \"github.com/a\"": false,
-		"_ \"github.com/a\"": false,
-	}
-}
+func firstAndThirdParty(moduleName string) map[string]party {
+	// We don't need to test first party packages here since they have a separate test.
+	return map[string]party{
+		fmt.Sprintf("\"%s\"", moduleName):       firstParty,
+		fmt.Sprintf("\"%s/\"", moduleName):      firstParty,
+		fmt.Sprintf("\"%s/a\"", moduleName):     firstParty,
+		fmt.Sprintf("\"%s/a/\"", moduleName):    firstParty,
+		fmt.Sprintf("\"%s/a123/\"", moduleName): firstParty,
+		fmt.Sprintf("a \"%s/a\"", moduleName):   firstParty,
+		fmt.Sprintf("_ \"%s/a\"", moduleName):   firstParty,
 
-func thirdPartyModule() map[string]bool {
-	return map[string]bool{
-		// stdLib
-		"\"test-ing\"":      false,
-		"\"testing\"":       false,
-		"t \"testing\"":     false,
-		"t2 \"testing\"":    false,
-		"_ \"testing\"":     false,
-		"\"path/filepath\"": false,
-		// Third party
-		"\"github.com\"":      false,
-		"\"github-com\"":      false,
-		"\"gitlab.com/a\"":    true,
-		"\"bitbucket.com/a\"": true,
-		"\"github.com/a\"":    true,
-		"g \"github.com/a\"":  true,
-		"_ \"github.com/a\"":  true,
+		"\"gitlab.com/a\"":    thirdParty,
+		"\"bitbucket.com/a\"": thirdParty,
+		"\"github.com/a\"":    thirdParty,
 	}
 }
 
