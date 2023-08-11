@@ -96,8 +96,30 @@ func TestIsThirdParty(t *testing.T) {
 }
 
 func TestClassification(t *testing.T) {
+	// Local module
 	moduleName := "moduleName"
 	m := localFirstPartyModule(moduleName)
+
+	for stmt, expected := range m {
+		n := determine(stmt, moduleName)
+		old := isFirstParty(stmt, moduleName)
+
+		if old != expected {
+			t.Errorf("Old != expected!")
+
+			return
+		}
+
+		if old && n != firstParty {
+			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
+		} else if !old && n == firstParty {
+			t.Errorf("stmt '%s' differs; Old: %v, new: %v", stmt, old, n)
+		}
+	}
+
+	// Hosted module
+	moduleName = "github.com/glad-dev/sort-imports"
+	m = localFirstPartyModule(moduleName)
 
 	for stmt, expected := range m {
 		n := determine(stmt, moduleName)
