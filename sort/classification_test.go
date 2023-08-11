@@ -116,7 +116,7 @@ func TestStdLibClassification(t *testing.T) {
 		}
 
 		if sameName != firstParty {
-			t.Errorf("Error with shadowing '%s' is not classified as stdLib: %v", stmt, moduleName)
+			t.Errorf("Error with shadowing: '%s' is not classified as first party: %v", stmt, moduleName)
 		}
 	}
 
