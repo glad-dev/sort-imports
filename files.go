@@ -11,51 +11,63 @@ import (
 	"github.com/glad-dev/sort-imports/sort"
 )
 
-func do(path string, moduleName string) error {
+// getFileList returns all files with a ".go" suffix in the given directory.
+func getFileList(path string, m map[string]os.FileMode) (map[string]os.FileMode, error) {
 	dir, err := os.ReadDir(path)
 	if err != nil {
-		return fmt.Errorf("reading dir: %w", err)
+		return nil, err
 	}
-
-	errChan := make(chan error, 100)
-	wg := &sync.WaitGroup{}
 
 	for _, entry := range dir {
 		if entry.IsDir() {
-			_ = do(filepath.Join(path, entry.Name()), moduleName) // ToDo
+			m, err = getFileList(filepath.Join(path, entry.Name()), m)
+			if err != nil {
+				return nil, err
+			}
+
+			continue
+		}
+
+		if !strings.HasSuffix(entry.Name(), ".go") {
+			continue
 		}
 
 		info, err := entry.Info()
 		if err != nil {
-			// Can't get file info => We can't get file permissions => Abort
-			continue // ToDo: Don't ignore error
+			return nil, err
 		}
 
-		if strings.HasSuffix(entry.Name(), ".go") {
-			func() {
-				wg.Add(1)
-				defer wg.Done()
+		m[filepath.Join(path, entry.Name())] = info.Mode().Perm()
+	}
 
-				err := handleFile(filepath.Join(path, entry.Name()), moduleName, info.Mode().Perm())
-				if err != nil {
-					errChan <- err
-				}
-			}()
-		}
+	return m, nil
+}
+
+// formatFiles returns if all files were formatted successfully.
+func formatFiles(m map[string]os.FileMode, moduleName string) bool {
+	success := true
+	wg := &sync.WaitGroup{}
+
+	for path, mode := range m {
+		wg.Add(1)
+
+		go func(p string, fm os.FileMode) {
+			defer wg.Done()
+
+			err := handleFile(p, fm, moduleName)
+			if err != nil {
+				success = false
+				fmt.Printf("Failed to format %s: %s\n", p, err)
+			}
+		}(path, mode)
 	}
 
 	wg.Wait()
 
-	select {
-	case e := <-errChan:
-		return e
-
-	default:
-		return nil
-	}
+	return success
 }
 
-func handleFile(path string, moduleName string, filePermissions os.FileMode) error {
+func handleFile(path string, filePermissions os.FileMode, moduleName string) error {
 	// Read file
 	f, err := os.ReadFile(path)
 	if err != nil {

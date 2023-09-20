@@ -12,15 +12,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	f, err := getModuleName(wd)
+	moduleName, err := getModuleName(wd)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
 	}
 
-	err = do(wd, f)
+	m := make(map[string]os.FileMode)
+	m, err = getFileList(wd, m)
 	if err != nil {
-		fmt.Printf("Failed to do work: %s\n", err)
+		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
 	}
+
+	if len(m) == 0 {
+		fmt.Printf("No go files found\n")
+
+		return
+	}
+
+	if !formatFiles(m, moduleName) {
+		os.Exit(1)
+	}
+
+	if len(m) == 1 {
+		fmt.Printf("Go file formated sucessfully.")
+
+		return
+	}
+
+	fmt.Printf("All %d Go files were succesfully formatted.", len(m))
 }
