@@ -150,7 +150,11 @@ func TestSortImports(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		sorted := Imports(c.imports, c.moduleName)
+		sorted, err := Imports(c.imports, c.moduleName)
+		if err != nil {
+			t.Errorf("Function returned an error: %s", err)
+		}
+
 		if !compareStringArray(sorted, c.expected) {
 			t.Errorf("Expected (%d): %s, got (%d): %v", len(c.expected), replaceSpecial(c.expected), len(sorted), replaceSpecial(sorted))
 		}

@@ -111,7 +111,11 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 		return fmt.Errorf("invalid end: %d", end)
 	}
 
-	sorted := sort.Imports(stmts, moduleName)
+	sorted, err := sort.Imports(stmts, moduleName)
+	if err != nil {
+		return err
+	}
+
 	for i := range sorted {
 		if len(strings.TrimSpace(sorted[i])) == 0 {
 			// We don't want to indent new lines
