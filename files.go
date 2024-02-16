@@ -84,6 +84,9 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 			start = i + 1
 			for k := i + 1; k < len(lines); k++ {
 				l := strings.TrimSpace(lines[k])
+				if len(l) == 0 {
+					continue
+				}
 
 				if l == ")" {
 					end = k
