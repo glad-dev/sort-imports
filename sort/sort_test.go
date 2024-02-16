@@ -136,6 +136,17 @@ func TestSortImports(t *testing.T) {
 				"\"sync\"",
 			},
 		},
+		{
+			moduleName: "github.com/glad-dev/sort-imports",
+			imports: []string{
+				"\"github.com/glad-dev/sort-imports\"/sub2",
+				"x \"github.com/glad-dev/sort-imports/sub1\"",
+			},
+			expected: []string{
+				"x \"github.com/glad-dev/sort-imports/sub1\"",
+				"\"github.com/glad-dev/sort-imports\"/sub2",
+			},
+		},
 	}
 
 	for _, c := range testCases {
