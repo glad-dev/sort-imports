@@ -128,11 +128,9 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 	newFile = append(newFile, lines[end:]...)
 
 	// Write files
-	if false {
-		err = os.WriteFile(path, []byte(strings.Join(newFile, "\n")), filePermissions)
-		if err != nil {
-			return fmt.Errorf("writing file: %w", err)
-		}
+	err = os.WriteFile(path, []byte(strings.Join(newFile, "\n")), filePermissions)
+	if err != nil {
+		return fmt.Errorf("writing file: %w", err)
 	}
 
 	return nil
