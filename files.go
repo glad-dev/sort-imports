@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -107,9 +106,9 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 		// File contains no multiline import statement
 		return nil
 	} else if start == 0 {
-		return errors.New("invalid start") // ToDo
+		return fmt.Errorf("invalid start: %d", start)
 	} else if end == 0 || end <= start {
-		return errors.New("invalid end") // ToDo
+		return fmt.Errorf("invalid end: %d", end)
 	}
 
 	sorted := sort.Imports(stmts, moduleName)
