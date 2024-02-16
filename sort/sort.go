@@ -42,11 +42,11 @@ func Imports(imports []string, moduleName string) []string {
 	sort.Strings(third)
 
 	if len(std) > 0 && (len(first) > 0 || len(third) > 0) {
-		std = append(std, "\n")
+		std = append(std, "")
 	}
 
 	if len(first) > 0 && len(third) > 0 {
-		first = append(first, "\n")
+		first = append(first, "")
 	}
 
 	// Combine the slices into output array

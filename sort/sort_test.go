@@ -67,7 +67,7 @@ func TestSortImports(t *testing.T) {
 			},
 			expected: []string{
 				"\"fmt\"",
-				"\n",
+				"",
 				"\"github.com/glad-dev/sort-imports/\"",
 			},
 		},
@@ -79,25 +79,8 @@ func TestSortImports(t *testing.T) {
 			},
 			expected: []string{
 				"\"fmt\"",
-				"\n",
+				"",
 				"\"github.com/glad-dev/sort-imports/\"",
-			},
-		},
-		{
-			moduleName: "github.com/glad-dev/sort-imports",
-			imports: []string{
-				"\"fmt\"",
-				"\"github.com/glad-dev/other-repo/\"",
-				"\"testing\"",
-				"\"github.com/glad-dev/sort-imports/\"",
-			},
-			expected: []string{
-				"\"fmt\"",
-				"\"testing\"",
-				"\n",
-				"\"github.com/glad-dev/sort-imports/\"",
-				"\n",
-				"\"github.com/glad-dev/other-repo/\"",
 			},
 		},
 		{
@@ -111,9 +94,26 @@ func TestSortImports(t *testing.T) {
 			expected: []string{
 				"\"fmt\"",
 				"\"testing\"",
-				"\n",
+				"",
 				"\"github.com/glad-dev/sort-imports/\"",
-				"\n",
+				"",
+				"\"github.com/glad-dev/other-repo/\"",
+			},
+		},
+		{
+			moduleName: "github.com/glad-dev/sort-imports",
+			imports: []string{
+				"\"fmt\"",
+				"\"github.com/glad-dev/other-repo/\"",
+				"\"testing\"",
+				"\"github.com/glad-dev/sort-imports/\"",
+			},
+			expected: []string{
+				"\"fmt\"",
+				"\"testing\"",
+				"",
+				"\"github.com/glad-dev/sort-imports/\"",
+				"",
 				"\"github.com/glad-dev/other-repo/\"",
 			},
 		},
