@@ -122,7 +122,8 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 	}
 
 	// Build new file content
-	newFile := lines[:start]
+	var newFile []string
+	newFile = append(newFile, lines[:start]...)
 	newFile = append(newFile, sorted...)
 	newFile = append(newFile, lines[end:]...)
 
