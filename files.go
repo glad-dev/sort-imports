@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -74,13 +75,14 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 		return fmt.Errorf("opening file: %w", err)
 	}
 
+	startRegex := regexp.MustCompile("^import\\s+(/\\*.*\\*/\\s*)?\\(") // Should match most import statement
 	lines := strings.Split(string(f), "\n")
 	stmts := make([]string, 0)
 	start := 0
 	end := 0
 
 	for i, line := range lines {
-		if strings.Contains(line, "import (") {
+		if startRegex.MatchString(line) {
 			start = i + 1
 			for k := i + 1; k < len(lines); k++ {
 				l := strings.TrimSpace(lines[k])
@@ -88,7 +90,7 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 					continue
 				}
 
-				if l == ")" {
+				if strings.HasPrefix(l, ")") {
 					end = k
 
 					break
