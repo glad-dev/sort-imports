@@ -113,6 +113,11 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 
 	sorted := sort.Imports(stmts, moduleName)
 	for i := range sorted {
+		if len(strings.TrimSpace(sorted[i])) == 0 {
+			// We don't want to indent new lines
+			continue
+		}
+
 		sorted[i] = "\t" + sorted[i]
 	}
 
