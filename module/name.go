@@ -28,7 +28,6 @@ func Name(path string) (string, error) {
 }
 
 func readModFile(path string) (string, error) {
-	// Read the file
 	f, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("reading go.mod: %w", err)
@@ -39,11 +38,19 @@ func readModFile(path string) (string, error) {
 		return "", fmt.Errorf("go.mod is empty")
 	}
 
-	if !strings.HasPrefix(lines[0], "module") {
+	location := -1
+	for i, line := range lines {
+		if strings.HasPrefix(line, "module") {
+			location = i
+			break
+		}
+	}
+
+	if location == -1 {
 		return "", fmt.Errorf("go.mod contains no 'module'")
 	}
 
-	name := strings.TrimSpace(lines[0][len("module"):])
+	name := strings.TrimSpace(lines[location][len("module"):])
 	if len(name) == 0 {
 		return "", fmt.Errorf("go.mod contains empty module name")
 	}
