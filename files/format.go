@@ -10,7 +10,7 @@ import (
 	"github.com/glad-dev/sort-imports/sort"
 )
 
-// Format returns if all files were formatted successfully.
+// Format returns whether all files were formatted successfully.
 func Format(m map[string]os.FileMode, moduleName string) bool {
 	success := true
 	wg := &sync.WaitGroup{}
