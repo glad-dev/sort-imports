@@ -1,9 +1,8 @@
-package main
+package files
 
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -11,40 +10,8 @@ import (
 	"github.com/glad-dev/sort-imports/sort"
 )
 
-// getFileList returns all files with a ".go" suffix in the given directory.
-func getFileList(path string, m map[string]os.FileMode) (map[string]os.FileMode, error) {
-	dir, err := os.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, entry := range dir {
-		if entry.IsDir() {
-			m, err = getFileList(filepath.Join(path, entry.Name()), m)
-			if err != nil {
-				return nil, err
-			}
-
-			continue
-		}
-
-		if !strings.HasSuffix(entry.Name(), ".go") {
-			continue
-		}
-
-		info, err := entry.Info()
-		if err != nil {
-			return nil, err
-		}
-
-		m[filepath.Join(path, entry.Name())] = info.Mode().Perm()
-	}
-
-	return m, nil
-}
-
-// formatFiles returns if all files were formatted successfully.
-func formatFiles(m map[string]os.FileMode, moduleName string) bool {
+// Format returns if all files were formatted successfully.
+func Format(m map[string]os.FileMode, moduleName string) bool {
 	success := true
 	wg := &sync.WaitGroup{}
 

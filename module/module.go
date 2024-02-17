@@ -1,4 +1,4 @@
-package main
+package module
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func getModuleName(path string) (string, error) {
+func Name(path string) (string, error) {
 	d, err := os.ReadDir(path)
 	if err != nil {
 		return "", err
@@ -24,7 +24,7 @@ func getModuleName(path string) (string, error) {
 		return "", fmt.Errorf("no go.mod file was found")
 	}
 
-	return getModuleName(parent)
+	return Name(parent)
 }
 
 func readModFile(path string) (string, error) {
