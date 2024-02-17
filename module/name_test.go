@@ -11,7 +11,7 @@ func TestFindModFile(t *testing.T) {
 	moduleName := "github.com/glad-dev/sort-imports"
 
 	run := func(path string) {
-		name, err := getModuleName(path)
+		name, err := Name(path)
 		if err != nil {
 			t.Errorf("Failed to get module name: %s", err)
 		} else if name != moduleName {
@@ -31,7 +31,7 @@ func TestFindModFile(t *testing.T) {
 	}(dir)
 
 	// Directory contains no go.mod file => should fail
-	name, err := getModuleName(dir)
+	name, err := Name(dir)
 	if err == nil {
 		t.Errorf("Found a go.mod file in an empty directory. Module name: %s", name)
 	}
