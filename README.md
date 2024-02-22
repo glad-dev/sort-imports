@@ -17,7 +17,7 @@ import (
 	"log"
 	"github.com/first/party/cmd"
 	"fmt"
-	"github.com/third/party1"
+	"github.com/third/party2
 	"errors"
 	ansel "github.com/first/party/test"
 	"github.com/third/party1"
@@ -35,7 +35,7 @@ import (
         ansel "github.com/first/party/test"
 
         "github.com/third/party1"
-        "github.com/third/party1"
+        "github.com/third/party2"
 )
 ````
 
