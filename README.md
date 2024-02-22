@@ -40,11 +40,11 @@ import (
 ````
 
 ## Usage
-``
+````shell
 sort-imports /abs/or/relative/path/
-``
+````
 
 ## Installation
-``
-go install github.com/glad-dev/sort-imports
-``
+````shell
+go install github.com/glad-dev/sort-imports@latest
+````
