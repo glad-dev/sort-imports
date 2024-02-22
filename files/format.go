@@ -49,14 +49,16 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 
 	for i, line := range lines {
 		if startRegex.MatchString(line) {
+			// We found a line that starts with "import ("
 			start = i + 1
-			for k := i + 1; k < len(lines); k++ {
+			for k := start; k < len(lines); k++ {
 				l := strings.TrimSpace(lines[k])
 				if len(l) == 0 {
 					continue
 				}
 
 				if strings.HasPrefix(l, ")") {
+					// We found the end of the import statement
 					end = k
 
 					break
@@ -78,11 +80,13 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 		return fmt.Errorf("invalid end: %d", end)
 	}
 
+	// Sort imports
 	sorted, err := sort.Imports(stmts, moduleName)
 	if err != nil {
 		return err
 	}
 
+	// Indent the import statements
 	for i := range sorted {
 		if len(strings.TrimSpace(sorted[i])) == 0 {
 			// We don't want to indent new lines
@@ -94,16 +98,16 @@ func handleFile(path string, filePermissions os.FileMode, moduleName string) err
 
 	// Build new file content
 	var newFile []string
-	newFile = append(newFile, lines[:start]...)
-	newFile = append(newFile, sorted...)
-	newFile = append(newFile, lines[end:]...)
+	newFile = append(newFile, lines[:start]...) // Begin of the file
+	newFile = append(newFile, sorted...)        // Import statements
+	newFile = append(newFile, lines[end:]...)   // Rest of the file
 
 	content := strings.Join(newFile, "\n")
 	if string(f) == content {
 		return nil
 	}
 
-	// Write files
+	// Write back
 	err = os.WriteFile(path, []byte(content), filePermissions)
 	if err != nil {
 		return fmt.Errorf("writing file: %w", err)
